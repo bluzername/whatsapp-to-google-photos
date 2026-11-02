@@ -14,7 +14,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: sudo apt-get update && sudo apt-get install -y libimage-exiftool-perl shellcheck
-      - run: pip install pytest pytest-cov ruff
+      - run: pip install pytest pytest-cov "ruff==0.15.2"
       - run: ruff check scripts tests
       - run: shellcheck scripts/*.sh
       - run: pytest --cov=scripts --cov-report=term-missing

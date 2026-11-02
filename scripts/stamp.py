@@ -1,4 +1,4 @@
-"""Match extracted WhatsApp media to its message, write the real send date, sort into per-chat albums.
+"""Match WhatsApp media to its message, write the real send date, sort into per-chat albums.
 
 Reads <root>/raw (from extract.py) and moves files into
 <root>/albums/WhatsApp - <chat>/<YYYY-MM-DD_HHMMSS>_<name>. Dates are written with one batched
@@ -92,7 +92,7 @@ def run_exiftool(blocks: list[list[str]], argfile: str) -> list[str]:
         fh.write("\n".join(args) + "\n")
     res = subprocess.run(["exiftool", "-@", argfile,
                           "-common_args", "-overwrite_original", "-P", "-m"],
-                         capture_output=True, text=True)
+                         capture_output=True, text=True, check=False)
     return [line for line in res.stderr.splitlines() if line.startswith("Error")]
 
 
@@ -108,7 +108,8 @@ def main() -> int:
         log = csv.writer(fh)
         blocks = move_matched(rows, raw, albums, log)
         unmatched = move_unmatched(raw, albums, log)
-    print(f"Moved {len(blocks)} dated files, {unmatched} unmatched. Running exiftool...", flush=True)
+    print(f"Moved {len(blocks)} dated files, {unmatched} unmatched. Running exiftool...",
+          flush=True)
     if not blocks:
         return 0
     errors = run_exiftool(blocks, os.path.join(args.root, "exiftool-args.txt"))

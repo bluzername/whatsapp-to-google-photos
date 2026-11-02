@@ -17,3 +17,9 @@ markers = ["integration: needs real external tools such as exiftool"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "PLW"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["extract", "stamp", "verify"]

@@ -10,7 +10,7 @@ import getpass
 import os
 import shutil
 import sys
-from typing import Callable
+from collections.abc import Callable
 
 BACKUP_ROOT = os.path.expanduser("~/Library/Application Support/MobileSync/Backup")
 DOMAIN = "AppDomainGroup-group.net.whatsapp.WhatsApp.shared"

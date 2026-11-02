@@ -48,7 +48,7 @@ def main() -> int:
     albums_dir = os.path.join(args.root, "albums")
 
     res = subprocess.run(["rclone", "lsf", "-R", "--files-only", f"{args.remote}:album"],
-                         capture_output=True, text=True)
+                         capture_output=True, text=True, check=False)
     if res.returncode != 0:
         print(res.stderr.strip()[-2000:], file=sys.stderr)
         return 2
@@ -60,7 +60,8 @@ def main() -> int:
         fh.writelines(f"{album}/{name}\n" for album, name in gone)
     for album, count in by_album.most_common():
         print(f"{count:6d} / {totals[album]:6d} missing  {album}")
-    print(f"{sum(totals.values()) - len(gone)} of {sum(totals.values())} files are in Google Photos; "
+    total = sum(totals.values())
+    print(f"{total - len(gone)} of {total} files are in Google Photos; "
           f"{len(gone)} missing (listed in missing.txt)")
     return 0 if not gone else 1
 

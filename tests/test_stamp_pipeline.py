@@ -13,7 +13,7 @@ import stamp
 # Smallest valid JPEG (1x1 px), so exiftool can write EXIF into it.
 TINY_JPEG = bytes.fromhex(
     "ffd8ffe000104a46494600010100000100010000ffdb004300080606070605080707070909080a0c140d0c0b0b0c19"
-    "1213 0f141d1a1f1e1d1a1c1c20242e2720222c231c1c2837292c30313434341f27393d38323c2e333432ffc0000b08"
+    "12130f141d1a1f1e1d1a1c1c20242e2720222c231c1c2837292c30313434341f27393d38323c2e333432ffc0000b08"
     "0001000101011100ffc4001f0000010501010101010100000000000000000102030405060708090a0bffc400b51000"
     "02010303020403050504040000017d01020300041105122131410613516107227114328191a1082342b1c11552d1f0"
     "2433627282090a161718191a25262728292a3435363738393a434445464748494a535455565758595a636465666768"
@@ -76,7 +76,7 @@ def test_main_end_to_end(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     (dated,) = (tmp_path / "albums" / "WhatsApp - Family").iterdir()
     expected = stamp.apple_to_local(600000000)
     out = subprocess.run(["exiftool", "-s3", "-DateTimeOriginal", str(dated)],
-                         capture_output=True, text=True).stdout.strip()
+                         capture_output=True, text=True, check=False).stdout.strip()
     assert out == expected.strftime("%Y:%m:%d %H:%M:%S")
 
     with open(tmp_path / "manifest.csv") as fh:
