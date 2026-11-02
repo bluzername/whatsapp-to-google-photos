@@ -1,0 +1,21 @@
+# Never commit personal data or credentials
+raw/
+albums/
+not-uploaded/
+manifest.csv
+missing.txt
+exiftool-args.txt
+upload.log
+*.sqlite
+rclone.conf
+client_secret*.json
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.DS_Store

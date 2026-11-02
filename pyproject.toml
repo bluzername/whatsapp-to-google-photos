@@ -1,0 +1,19 @@
+[project]
+name = "whatsapp-to-google-photos"
+version = "0.1.0"
+description = "Move WhatsApp photos and videos from an iPhone into Google Photos with real send dates and one album per chat."
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["iphone_backup_decrypt>=0.9"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+testpaths = ["tests"]
+markers = ["integration: needs real external tools such as exiftool"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
