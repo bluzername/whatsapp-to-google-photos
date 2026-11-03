@@ -140,6 +140,7 @@ Every one of these happened during a real run. `upload.sh` deals with each:
 - **`--gphotos-batch-mode async` crashes rclone 1.75.2** (nil pointer in `setMetaData`): the script uses `sync` mode.
 - **`409 ABORTED` / `concurrent write request`**: transient; the file is retried on the next pass.
 - **"There was an error while trying to create this media item"**: Google rejects some tiny WhatsApp cache files (for example 32x32 PNG icons saved as `.jpg`). These land in the Unmatched album and are not real photos.
+- **Forwarded photos look missing forever.** Google Photos stores byte-identical media once, under the first upload's filename, so a photo forwarded to five chats appears under one name and rclone re-sends the other four every pass (about 2% of files in testing). Nothing is duplicated in your library. `upload.sh` stops with `=== CONVERGED` once a pass re-sends only those, and `verify.py` counts a file as backed up when its exact bytes are already in Google Photos.
 - **Each pass re-lists every album**, which costs quota. After a non-quota failure the script waits 10 minutes instead of hammering the API.
 
 ## What is not covered

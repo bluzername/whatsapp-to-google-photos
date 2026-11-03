@@ -23,7 +23,7 @@ Move a user's WhatsApp photos and videos from their iPhone into Google Photos, w
 | Stamp | `python3 scripts/stamp.py` | runs it, reports exiftool errors | |
 | Google OAuth | see README "Google setup" | can drive the Cloud Console in a browser; must not accept cookie or consent banners unasked | signs in, copies the client secret, runs `rclone config create` |
 | Upload | `nohup caffeinate -i -s scripts/upload.sh >/dev/null 2>&1 &` | starts it, monitors with `scripts/status.sh` | keeps the Mac on and online |
-| Verify | `python3 scripts/verify.py` | runs it, reports per-album gaps | spot-checks albums in Google Photos |
+| Verify | `python3 scripts/verify.py` (after `=== DONE` or `=== CONVERGED`) | runs it, reports per-album gaps | spot-checks albums in Google Photos |
 | Free space | WhatsApp > Settings > Storage and Data > Manage Storage | **never** | deletes media |
 
 Test the upload with one small album before the full run:
@@ -48,6 +48,8 @@ rclone lsl "gphotos:album/WhatsApp - <small chat>"   # dates must match the What
 | `panic:` | rclone crash | check `rclone version`; do not enable async batch mode |
 | `invalid_grant` / token errors | OAuth refresh token expired (7-day testing limit) | ask the user to run `rclone config reconnect gphotos:` |
 | `=== DONE` | every file uploaded | run `verify.py` |
+| `=== CONVERGED` | only forwarded duplicates are left, which Google already holds under another name | run `verify.py` |
+| more `Copied (new)` lines than files | the same duplicates re-sent each pass | none; not a problem |
 
 `status.sh` rates use the last hour of `Copied (new)` lines, so right after a pause the ETA is pessimistic for a while.
 

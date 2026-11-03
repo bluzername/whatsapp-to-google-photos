@@ -13,7 +13,7 @@ def make_albums(tmp_path: Path) -> Path:
     for album, files in {"WhatsApp - A": ["1.jpg", "2.jpg"], "WhatsApp - B": ["3.mp4"]}.items():
         (tmp_path / album).mkdir()
         for name in files:
-            (tmp_path / album / name).write_bytes(b"x")
+            (tmp_path / album / name).write_bytes(f"{album}/{name}".encode())
     (tmp_path / "WhatsApp - A" / ".DS_Store").write_bytes(b"")
     return tmp_path
 
@@ -51,3 +51,16 @@ def test_main_reports_rclone_failure(tmp_path: Path, monkeypatch: pytest.MonkeyP
                         lambda *a, **k: subprocess.CompletedProcess(a, 1, "", "auth error"))
     monkeypatch.setattr(sys, "argv", ["verify.py", "--root", str(tmp_path)])
     assert verify.main() == 2
+
+
+def test_byte_identical_copy_counts_as_backed_up(tmp_path: Path) -> None:
+    (tmp_path / "WhatsApp - A").mkdir()
+    (tmp_path / "WhatsApp - B").mkdir()
+    (tmp_path / "WhatsApp - A" / "orig.jpg").write_bytes(b"same bytes")
+    (tmp_path / "WhatsApp - B" / "forwarded.jpg").write_bytes(b"same bytes")
+    (tmp_path / "WhatsApp - B" / "unique.jpg").write_bytes(b"different!")  # same size, other bytes
+    gone = [("WhatsApp - B", "forwarded.jpg"), ("WhatsApp - B", "unique.jpg")]
+    present = [("WhatsApp - A", "orig.jpg")]
+    assert verify.covered_by_duplicate(str(tmp_path), gone, present) == {
+        ("WhatsApp - B", "forwarded.jpg")
+    }

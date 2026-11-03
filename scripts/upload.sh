@@ -22,9 +22,11 @@ sleep_until_quota_reset() {
 }
 
 # Runs one rclone pass; returns 0 on success, 2 on daily quota, 3 on a stall, 1 on other failure.
+# Sets PASS_START to the log line where this pass began.
 run_pass() {
   local start rc
   start=$(( $(wc -l < "$LOG") + 1 ))
+  PASS_START=$start
   rclone copy "$ROOT/albums" "$REMOTE:album" \
     --transfers 4 --gphotos-batch-size 48 --gphotos-batch-mode sync \
     --retries 3 --low-level-retries 5 \
@@ -49,11 +51,29 @@ run_pass() {
   return 1
 }
 
+# Files this pass reported as copied, one "Album/file" per line, sorted.
+copied_this_pass() {
+  tail -n +"$PASS_START" "$LOG" | grep 'Copied (new)' \
+    | sed -E 's/^.{19} INFO  : //; s/: Copied \(new\)$//' | sort -u
+}
+
 touch "$LOG"
+PREV="$ROOT/.copied-prev-pass"
+: > "$PREV"
 for pass in $(seq 1 "$MAX_PASSES"); do
   echo "=== pass $pass $(date '+%F %T')" >> "$LOG"
   run_pass
-  case $? in
+  rc=$?
+  # Google Photos keeps one copy of byte-identical media under the first upload's name, so
+  # rclone never sees forwarded duplicates and re-sends them every pass. When a full pass
+  # re-sends only what the previous one did, everything new is up: stop and run verify.py.
+  copied_this_pass > "$PREV.new"
+  if [ "$rc" -eq 1 ] && [ -s "$PREV" ] && [ -z "$(comm -23 "$PREV.new" "$PREV")" ]; then
+    echo "=== CONVERGED: last pass only re-sent duplicates; run verify.py $(date '+%F %T')" >> "$LOG"
+    rm -f "$PREV" "$PREV.new"; exit 0
+  fi
+  [ "$rc" -eq 0 ] || [ "$rc" -eq 1 ] && mv "$PREV.new" "$PREV"
+  case $rc in
     0) echo "=== DONE $(date '+%F %T')" >> "$LOG"; exit 0 ;;
     2) sleep_until_quota_reset ;;
     3) ;;
